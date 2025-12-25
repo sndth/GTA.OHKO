@@ -16,7 +16,7 @@ DWORD WINAPI
 InitThread(LPVOID)
 {
   try {
-    auto ifs = std::ifstream("scripts/SA-OHKO.json"); // WTF?
+    auto ifs = std::ifstream("scripts/SA.OHKO.json"); // WTF?
     auto json = json::parse(ifs);
     auto version = Version::Verify();
 
@@ -36,7 +36,7 @@ InitThread(LPVOID)
   } catch (const json::exception& e) {
     MessageBoxA(
       nullptr,
-      ("Failed to open SA-OHKO.json: " + std::string(e.what())).c_str(),
+      ("Failed to open SA.OHKO.json: " + std::string(e.what())).c_str(),
       "One Hit Knock Out",
       MB_ICONERROR);
     return FALSE;

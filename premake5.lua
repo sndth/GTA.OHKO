@@ -1,4 +1,4 @@
-workspace("SA-OHKO")
+workspace("SA.OHKO")
   -- Common settings
   location("build")
   cppdialect("C++latest")
@@ -20,7 +20,7 @@ workspace("SA-OHKO")
     optimize("Full")
 
   -- Project settings
-  project("SA-OHKO")
+  project("SA.OHKO")
     kind("SharedLib")
     targetextension(".asi")
 
