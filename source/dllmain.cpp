@@ -16,22 +16,43 @@ DWORD WINAPI
 InitThread(LPVOID)
 {
   try {
-    auto ifs = std::ifstream("scripts/SA.OHKO.json"); // WTF?
-    auto json = json::parse(ifs);
-    auto version = Version::Verify();
+    bool found = false;
+    namespace fs = std::filesystem;
 
-    if (!Version::IsSanAndreas(version) || 0x75770 == version.ver_offset) {
-      MessageBoxA(
-        nullptr, "Unsupported game version", "One Hit Knock Out", MB_ICONERROR);
-      return FALSE;
+    for (auto& item : fs::recursive_directory_iterator(fs::current_path())) {
+      auto& path = item.path();
+
+      if (path.filename() != "SA.OHKO.json")
+        continue;
+
+      found = true;
+      auto ifs = std::ifstream(path);
+      auto json = json::parse(ifs);
+      auto version = Version::Verify();
+
+      if (!Version::IsSanAndreas(version) || 0x75770 == version.ver_offset) {
+        MessageBoxA(nullptr,
+                    "Unsupported game version",
+                    "One Hit Knock Out",
+                    MB_ICONERROR);
+        return FALSE;
+      }
+
+      bool enable = json.value("Enable", true);
+      bool die_after_bike_fall = json.value("DieAfterBikeFall", true);
+
+      if (enable) {
+        Patches::PatchHealthBar(version.ver_offset);
+        Patches::StartOHKOThread(version.ver_offset, die_after_bike_fall);
+      }
+
+      break;
     }
 
-    bool enable = json.value("Enable", true);
-    bool die_after_bike_fall = json.value("DieAfterBikeFall", true);
-
-    if (enable) {
-      Patches::PatchHealthBar(version.ver_offset);
-      Patches::StartOHKOThread(version.ver_offset, die_after_bike_fall);
+    if (!found) {
+      MessageBoxA(
+        nullptr, "SA.OHKO.json not found", "One Hit Knock Out", MB_ICONERROR);
+      return FALSE;
     }
   } catch (const json::exception& e) {
     MessageBoxA(
