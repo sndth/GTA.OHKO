@@ -52,16 +52,10 @@ Patches::PatchHealthBar(uint32_t ver_offset) -> bool
   return true;
 }
 
-struct OHKOArgs
-{
-  uint32_t ver_offset;
-  bool die_after_bike_fall;
-};
-
 auto
-Patches::StartOHKOThread(uint32_t ver_offset, bool die_after_bike_fall) -> bool
+Patches::StartOHKOThread(uint32_t ver_offset) -> bool
 {
-  auto* args = new OHKOArgs{ ver_offset, die_after_bike_fall };
+  auto* args = new uint32_t{ ver_offset };
   auto handle =
     CreateThread(nullptr, 0, &Patches::OHKOThread, args, 0, nullptr);
 
@@ -74,24 +68,26 @@ Patches::StartOHKOThread(uint32_t ver_offset, bool die_after_bike_fall) -> bool
   return true;
 }
 
+#include "config.hpp"
+
 auto WINAPI
 Patches::OHKOThread(LPVOID param) -> DWORD
 {
-  auto args = *reinterpret_cast<OHKOArgs*>(param);
-  delete reinterpret_cast<OHKOArgs*>(param);
+  auto args = *reinterpret_cast<uint32_t*>(param);
+  delete reinterpret_cast<uint32_t*>(param);
 
   uint32_t max_health_address = 0;
   uint32_t max_armour_address = 0;
   uint32_t player_pointer = 0;
 
-  if (args.ver_offset == 0x75130) {
+  if (args == 0x75130) {
     max_health_address = 0x00C0BDC8;
     max_armour_address = 0x00C0F9E0;
     player_pointer = 0x00C0F890;
   } else {
-    max_health_address = 0x00B793E0 + args.ver_offset;
-    max_armour_address = 0x00B7CEE8 + args.ver_offset;
-    player_pointer = 0x00B7CD98 + args.ver_offset;
+    max_health_address = 0x00B793E0 + args;
+    max_armour_address = 0x00B7CEE8 + args;
+    player_pointer = 0x00B7CD98 + args;
   }
 
   while (true) {
@@ -105,7 +101,7 @@ Patches::OHKOThread(LPVOID param) -> DWORD
     static constexpr uint32_t k_health_offset = 0x540;
     auto health_address = uint32_t{ player + k_health_offset };
 
-    if (args.die_after_bike_fall) {
+    if (Config::GetConfig().die_after_bike_fall) {
       static constexpr uint32_t k_vehicle_model_id_offset = 0x22;
       static constexpr float k_crash_hp_delta = 0.15f;
       static uint32_t last_vehicle = 0;

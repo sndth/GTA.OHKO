@@ -19,7 +19,7 @@ class Patches
 public:
   auto static IsGameRunning() -> bool;
   auto static PatchHealthBar(uint32_t ver_offset) -> bool;
-  auto static StartOHKOThread(uint32_t ver_offset, bool die_after_bike_fall)
+  auto static StartOHKOThread(uint32_t ver_offset)
     -> bool;
 
 private:
